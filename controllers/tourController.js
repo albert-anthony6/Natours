@@ -2,6 +2,27 @@ const fs = require('fs');
 
 const tours = JSON.parse(fs.readFileSync('./dev-data/data/tours-simple.json'));
 
+exports.checkId = (req, res, next, val) => {
+    console.log(`Tour ID is ${val}`);
+    if(req.params.id * 1 > tours.length) {
+        return res.status(404).json({
+            status: "fail",
+            message: "Invalid ID"
+        });
+    };
+    next();
+}; // Middleware that works when a url param is used
+
+exports.checkBody = (req, res, next) => {
+    if (!req.body.name || !req.body.price) {
+        return res.status(400).json({
+            status: "fail",
+            message: "Missing name or price"
+        }); // 400 Means bad request (invalid)
+    };
+    next();
+};
+
 exports.getAllTours = (req, res) => {
     console.log(req.requestTime);
     res.status(200).json({
@@ -45,13 +66,6 @@ exports.createTour = (req, res) => {
 };
 
 exports.updateTour = (req, res) => {
-    if(req.params.id * 1 > tours.length) {
-        return res.status(404).json({
-            status: "fail",
-            message: "Invalid ID"
-        });
-    };
-
     res.status(200).json({
         status: "success",
         data: {
@@ -61,13 +75,6 @@ exports.updateTour = (req, res) => {
 };
 
 exports.deleteTour = (req, res) => {
-    if(req.params.id * 1 > tours.length) {
-        return res.status(404).json({
-            status: "fail",
-            message: "Invalid ID"
-        });
-    };
-
     res.status(204).json({
         status: "success",
         data: null

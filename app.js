@@ -7,9 +7,13 @@ const userRouter = require('./routes/userRoutes');
 const app = express(); // Upon calling express, variable app will get a bunch of methods
 
 // 1) MIDDLEWARES
-app.use(morgan('dev'));
+console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV === "development") {
+    app.use(morgan('dev'));
+}
 
 app.use(express.json());
+app.use(express.static('./public'));
 
 app.use((req, res, next) => {
     req.requestTime = new Date().toISOString();
