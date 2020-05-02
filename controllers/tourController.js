@@ -4,8 +4,22 @@ const Tour = require('../models/tourModel');
 
 exports.getAllTours = async (req, res) => {
     try{
-        const tours = await Tour.find();
+        // BUILD QUERY
+        // 1) Filtering
+        const queryObj = { ...req.query }; // Must be a copy of the object in order to not alter the original object
+        const excludeFields = ['page', 'sort', 'limit', 'fields'];
+        excludeFields.forEach(el => delete queryObj[el]);
 
+        // 2) Advanced Filtering
+        let queryStr = JSON.stringify(queryObj);
+        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`); // \b so that it only matches with the letters we want and not words that contain such letters. /g so that it goes through all occrances and not only one
+
+        const query = Tour.find(JSON.parse(queryStr));
+
+        // EXECUTE QUERY
+        const tours = await query;
+
+        // SEND REQUEST
         res.status(200).json({
             status: 'success',
             results: tours.length,
@@ -56,7 +70,7 @@ exports.createTour = async (req, res) => {
     } catch (err) {
         res.status(400).json({
             status: "fail",
-            message: "Invalid data sent!"
+            message: err
         })
     }
 
